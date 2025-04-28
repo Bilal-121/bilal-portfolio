@@ -20,7 +20,7 @@ const workHistory = [
     icon: <FaBriefcase />,
   },
   {
-    title: "HBS Computer Science",
+    title: "BSc (Hons) Computer Science",
     company: "Student",
     period: "Septmber 2020 - Julay 2023",
     description: "Studied computer science, focusing on web development, programming languages, and software engineering principles. Gained hands-on experience through projects and internships.",
