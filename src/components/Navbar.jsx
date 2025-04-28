@@ -10,7 +10,7 @@ export default function Navbar() {
         </div>
 
         {/* Nav Links */}
-        <nav className="hidden md:flex gap-6 font-body text-sm text-[#ccd6f6]">
+        <nav className="flex flex-col sm:flex-row gap-8 font-body text-sm text-[#ccd6f6]">
           <a href="#about" className="hover:text-accent transition-all duration-200">
             About
           </a>
