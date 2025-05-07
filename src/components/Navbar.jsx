@@ -1,4 +1,4 @@
-import resumePDF from "../assets/CV.pdf";
+// import resumePDF from "../assets/Bilal-Essakini-CV.pdf"; Import your resume PDF file here
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi"; // Import burger (menu) and close icons
 
@@ -43,15 +43,14 @@ export default function Navbar() {
           <a onClick={() => setIsOpen(false)} href="#about" className="hover:text-accent transition-all">About</a>
           <a onClick={() => setIsOpen(false)} href="#projects" className="hover:text-accent transition-all">Projects</a>
           <a onClick={() => setIsOpen(false)} href="#contact" className="hover:text-accent transition-all">Contact</a>
-          <a
-            onClick={() => setIsOpen(false)}
-            href={resumePDF} // Or your resume import
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border border-accent text-accent px-3 py-1 rounded hover:bg-accent hover:text-background transition text-center"
+          <button
+            onClick={() => window.open('/Bilal-Essakini-CV.pdf', '_blank')}
+            className="border border-accent text-accent px-3 py-1 rounded hover:bg-accent hover:text-background transition"
           >
             Resume
-          </a>
+          </button>
+
+
         </div>
       )}
     </header>
