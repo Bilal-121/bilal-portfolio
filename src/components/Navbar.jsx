@@ -1,59 +1,79 @@
-// import resumePDF from "../assets/Bilal-Essakini-CV.pdf"; Import your resume PDF file here
 import { useState } from "react";
-import { FiMenu, FiX } from "react-icons/fi"; // Import burger (menu) and close icons
+import { FiMenu, FiX } from "react-icons/fi";
+import LiveInfo from "./LiveInfo";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-[#0a192f] shadow-md">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-        
+    <header className="fixed top-0 left-0 w-full z-50 bg-background/35 backdrop-blur-md border-b border-border">
+      <nav className="container-g flex justify-between items-center py-4">
         {/* Logo */}
-        <div className="text-accent font-heading text-2xl font-bold tracking-widest">
-          B
-        </div>
+        <a
+          href="#hero"
+          className="font-heading text-2xl gradient-text tracking-widest"
+        >
+          BE
+        </a>
 
-        {/* Desktop Nav Links */}
-        <nav className="hidden md:flex gap-8 font-body text-sm text-[#ccd6f6]">
-          <a href="#about" className="hover:text-accent transition-all duration-200">About</a>
-          <a href="#projects" className="hover:text-accent transition-all duration-200">Projects</a>
-          <a href="#contact" className="hover:text-accent transition-all duration-200">Contact</a>
-          <a
-            href="/Bilal-Resume.pdf" // Or your resume import
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border border-accent text-accent px-3 py-1 rounded hover:bg-accent hover:text-background transition"
-          >
-            Resume
-          </a>
-        </nav>
+        {/* /* Desktop Nav */}
+          <ul className="hidden md:flex gap-8 font-body text-sm text-text/90 items-center">
+            <li><a href="#about" className="hover:text-glow transition">About</a></li>
+            <li><a href="#work" className="hover:text-glow transition">Experience</a></li>
+            <li><a href="#projects" className="hover:text-glow transition">Projects</a></li>
+            <li><a href="#contact" className="hover:text-glow transition">Contact</a></li>
+            <li>
+              <a
+                href="/Bilal-Resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border border-glow text-glow px-3 py-1 rounded hover:bg-glow hover:text-background transition"
+              >
+                Resume
+              </a>
+            </li>
+            <li>
+              <LiveInfo />
+            </li>
+          </ul>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <button onClick={() => setIsOpen(!isOpen)} className="text-accent focus:outline-none">
-            {isOpen ? <FiX size={28} /> : <FiMenu size={28} />}
-          </button>
-        </div>
-      </div>
+          {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden text-glow focus:outline-none"
+        >
+          {isOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+        </button>
+      </nav>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Nav */}
       {isOpen && (
-        <div className="md:hidden bg-[#0a192f] px-6 py-4 flex flex-col gap-6 text-[#ccd6f6] font-body text-lg shadow-md">
-          <a onClick={() => setIsOpen(false)} href="#about" className="hover:text-accent transition-all">About</a>
-          <a onClick={() => setIsOpen(false)} href="#projects" className="hover:text-accent transition-all">Projects</a>
-          <a onClick={() => setIsOpen(false)} href="#contact" className="hover:text-accent transition-all">Contact</a>
-          <button
-            onClick={() => window.open('/Bilal-Essakini-CV.pdf', '_blank')}
-            className="border border-accent text-accent px-3 py-1 rounded hover:bg-accent hover:text-background transition"
-          >
-            Resume
-          </button>
-
-
+        <div className="md:hidden bg-background border-t border-border text-text/90 font-body text-lg">
+          <ul className="flex flex-col gap-6 p-6">
+            {["about", "work", "projects", "contact"].map((id) => (
+              <li key={id}>
+                <a
+                  href={`#${id}`}
+                  onClick={() => setIsOpen(false)}
+                  className="hover:text-glow transition"
+                >
+                  {id.charAt(0).toUpperCase() + id.slice(1)}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a
+                href="/Bilal-Resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border border-glow text-glow px-3 py-1 rounded hover:bg-glow hover:text-background transition inline-block text-center"
+              >
+                Resume
+              </a>
+            </li>
+          </ul>
         </div>
       )}
     </header>
   );
 }
-
