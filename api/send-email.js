@@ -1,7 +1,5 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -16,6 +14,15 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  if (!process.env.RESEND_API_KEY) {
+    console.error("RESEND_API_KEY not found in environment");
+    return res.status(500).json({
+      error: "Email service not configured on server",
+    });
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   try {
     const { projectBrief, conversationHistory } = req.body;
