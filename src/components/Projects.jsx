@@ -129,7 +129,10 @@ export default function Projects() {
                       </p>
                       
                       <div className="mt-auto">
-                        <p className="text-xs text-center text-text/60 italic">
+                        <p className="text-xs text-center text-text/60 italic md:hidden">
+                          Click the card to flip and see more
+                        </p>
+                        <p className="text-xs text-center text-text/60 italic hidden md:block">
                           Hover to flip and see more →
                         </p>
                       </div>
