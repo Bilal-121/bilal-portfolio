@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { fadeInUp, staggerChildren } from "../lib/motion";
 import SectionPill from "./SectionPill";
 import { FiExternalLink, FiGithub } from "react-icons/fi";
-import projectVideo from "../assets/portfolio-website-video.mp4";
+import portfolioProjectVideo from "../assets/portfolio-website-video.mp4";
+import cinemaBookingVideo from "../assets/Cinema-Booking-System-video.mp4";
 
 const projects = [
 
@@ -14,7 +15,7 @@ const projects = [
     tech: "Node.js • React • Tailwind • REST API• Vite • Framer Motion",
     github: "https://github.com/Bilal-121/bilal-portfolio",
     url: "https://bilal-portfolio-orpin.vercel.app/",
-    live: projectVideo,
+    live: portfolioProjectVideo,
   },
   {
     title: "Office Desk Booking System",
@@ -26,7 +27,7 @@ const projects = [
     live: "#",
   },
   {
-    title: "Expense Tracker Web App (WIP)",
+    title: "Expense Tracker Web App",
     description:
       "A lightweight FastAPI + React app for expense tracking, OCR receipt scanning, and dynamic budget visualization.",
     tech: "Python • FastAPI • React • Tailwind",
@@ -45,8 +46,9 @@ const projects = [
     title: "Cinema Booking Website",
     description:
       "A cinema ticket booking platform with seat selection, authentication, and payment integration.",
-    tech: "PHP • JS • MySQL • HTML • CSS • CRUD",
-    github: "#",
+    tech: "PHP • MySQL • JS • HTML • CSS Bootstrap • XAMPP",
+    github: "https://github.com/Bilal-121/Cinema-Booking-Website-Project",
+    live: cinemaBookingVideo,
   },
   {
     title: "Face Recognition Attendance System",
