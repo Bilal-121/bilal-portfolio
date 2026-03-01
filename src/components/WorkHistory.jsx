@@ -5,9 +5,16 @@ import { fadeInUp } from "../lib/motion";
 
 const workHistory = [
   {
+    title: "Data Acquisition Engineer",
+    company: "Open Signal",
+    period: "December 2025 – Present",
+    description:
+      "Designing and implementing scalable data pipelines to collect and process mobile network performance data. Collaborating with cross-functional teams to optimize data acquisition strategies and ensure high-quality insights.",
+  },
+  {
     title: "Web Developer",
     company: "University of Hertfordshire",
-    period: "March 2025 – Present",
+    period: "March 2025 – November 2025",
     description:
       "Leading the design and development of performant, accessible web apps with React, CMS, and APIs. Building next-gen university experiences.",
   },
@@ -61,7 +68,7 @@ export default function WorkHistory() {
           {/* Timeline vertical glowing spine */}
           <motion.div
             style={{ height: lineHeight }}
-            className="absolute left-1/2 -translate-x-1/2 top-0 w-[2px] bg-gradient-to-b from-glow/50 via-glow/70 to-violet/60 rounded-full shadow-glow"
+            className="hidden md:block absolute left-1/2 -translate-x-1/2 top-0 w-[2px] bg-gradient-to-b from-glow/50 via-glow/70 to-violet/60 rounded-full shadow-glow"
           />
 
           <div className="flex flex-col gap-20 relative z-10 w-full md:w-3/4">
@@ -89,7 +96,7 @@ export default function WorkHistory() {
                 } md:items-center gap-8`}
               >
                 {/* Connector circle */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-6 w-4 h-4 rounded-full bg-glow shadow-glow z-10 group-hover:scale-125 transition-transform duration-300" />
+                <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-6 w-4 h-4 rounded-full bg-glow shadow-glow z-10 group-hover:scale-125 transition-transform duration-300" />
 
                 {/* Content Card */}
                 <motion.div

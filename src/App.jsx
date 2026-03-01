@@ -10,6 +10,11 @@ import Footer from "./components/Footer";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 
 export default function App() {
+  // Prevent page scroll jumping on load
+  useEffect(() => {
+    window.history.scrollRestoration = "manual";
+  }, []);
+
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,

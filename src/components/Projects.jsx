@@ -6,6 +6,16 @@ import { FiExternalLink, FiGithub } from "react-icons/fi";
 import projectVideo from "../assets/portfolio-website-video.mp4";
 
 const projects = [
+
+  {
+    title: "Portfolio Website",
+    description:
+      "A sleek, futuristic personal portfolio designed with React, Vite, and Tailwind CSS. Features smooth animations and Lenis scroll integration.",
+    tech: "Node.js • React • Tailwind • REST API• Vite • Framer Motion",
+    github: "https://github.com/Bilal-121/bilal-portfolio",
+    url: "https://bilal-portfolio-orpin.vercel.app/",
+    live: projectVideo,
+  },
   {
     title: "Office Desk Booking System",
     description:
@@ -14,15 +24,6 @@ const projects = [
     github: "#",
     url: "#",
     live: "#",
-  },
-  {
-    title: "Portfolio Website",
-    description:
-      "A sleek, futuristic personal portfolio designed with React, Vite, and Tailwind CSS. Features smooth animations and Lenis scroll integration.",
-    tech: "React • Tailwind • Vite • Framer Motion",
-    github: "https://github.com/Bilal-121/bilal-portfolio",
-    url: "https://bilal-portfolio-orpin.vercel.app/",
-    live: projectVideo,
   },
   {
     title: "Expense Tracker Web App (WIP)",
@@ -84,7 +85,7 @@ export default function Projects() {
                 style={{ perspective: "1000px" }}
               >
                 <div
-                  className="relative w-full h-full transition-transform duration-1000 ease-out group-hover:[transform:rotateY(180deg)]"
+                  className="relative w-full h-full transition-transform duration-1000 ease-out group-hover:[transform:rotateY(180deg)] pointer-events-auto"
                   style={{ 
                     transformStyle: "preserve-3d",
                   }}
@@ -138,7 +139,7 @@ export default function Projects() {
 
                   {/* BACK SIDE */}
                   <div 
-                    className="absolute inset-0 panel p-6 rounded-2xl overflow-hidden flex flex-col"
+                    className="absolute inset-0 panel p-6 rounded-2xl overflow-hidden flex flex-col pointer-events-auto z-20"
                     style={{ 
                       backfaceVisibility: "hidden",
                       WebkitBackfaceVisibility: "hidden",
@@ -176,28 +177,30 @@ export default function Projects() {
                     </p>
 
                     {/* Buttons */}
-                    <div className="flex gap-3 mt-auto">
+                    <div className="flex gap-3 mt-auto relative z-30">
                       {p.github && p.github !== '#' && (
-                        <a
-                          href={p.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-2 bg-glow/10 hover:bg-glow/20 text-glow py-2 px-4 rounded-lg transition-all duration-300 text-sm border border-glow/30"
-                          onClick={(e) => e.stopPropagation()}
+                        <button
+                          onClick={() => {
+                            if (p.github && p.github !== '#') {
+                              window.open(p.github, '_blank', 'noopener,noreferrer');
+                            }
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2 bg-glow/20 hover:bg-glow/40 hover:text-white hover:shadow-lg hover:shadow-glow/50 text-glow py-2 px-4 rounded-lg transition-all duration-300 text-sm border border-glow/40 hover:border-glow/80 cursor-pointer font-semibold pointer-events-auto relative z-40"
                         >
-                          <FiGithub /> Code
-                        </a>
+                          <FiGithub size={18} /> Code
+                        </button>
                       )}
                       {p.url && p.url !== '#' && (
-                        <a
-                          href={p.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-2 bg-violet/10 hover:bg-violet/20 text-violet py-2 px-4 rounded-lg transition-all duration-300 text-sm border border-violet/30"
-                          onClick={(e) => e.stopPropagation()}
+                        <button
+                          onClick={() => {
+                            if (p.url && p.url !== '#') {
+                              window.open(p.url, '_blank', 'noopener,noreferrer');
+                            }
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2 bg-violet/20 hover:bg-violet/40 hover:text-white hover:shadow-lg hover:shadow-violet/50 text-violet py-2 px-4 rounded-lg transition-all duration-300 text-sm border border-violet/40 hover:border-violet/80 cursor-pointer font-semibold pointer-events-auto relative z-40"
                         >
-                          <FiExternalLink /> Live
-                        </a>
+                          <FiExternalLink size={18} /> Live
+                        </button>
                       )}
                     </div>
 

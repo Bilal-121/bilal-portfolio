@@ -131,8 +131,8 @@ export default function About() {
               viewport={{ once: false }}
               className="text-lg mb-4"
             >
-              I'm a Front-End Developer passionate about crafting clean, user-first
-              experiences that perform beautifully.
+              I’m a front-end developer who loves building clean, 
+              user-first websites that look great and run fast.
             </motion.p>
 
             <motion.p 
@@ -144,19 +144,11 @@ export default function About() {
             >
               I enjoy turning ideas into performant digital products using{" "}
               <span className="text-glow">React</span> and{" "}
-              <span className="text-violet">Tailwind CSS</span>. My goal is to
-              create interfaces that feel as smooth as they look.
-            </motion.p>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.6 }}
-              viewport={{ once: false }}
-              className="text-lg"
-            >
-              Also I'm on a journey to mastering new technologies and pushing the
-              boundaries of web development. Im currently diving deeper into{" "}
-              <span className="text-glow">TypeScript</span> to enhance my skill set.
+              <span className="text-violet">Tailwind CSS</span>, 
+              with a focus on detail and smooth experience. 
+              I’m always learning and improving, and right now I’m diving deeper into 
+              <span className="text-glow"> TypeScript </span> 
+              to level up my skills and build even better products.
             </motion.p>
           </motion.div>
 

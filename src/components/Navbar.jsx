@@ -49,7 +49,7 @@ export default function Navbar() {
       {/* Mobile Nav */}
       {isOpen && (
         <div className="md:hidden bg-background border-t border-border text-text/90 font-body text-lg">
-          <ul className="flex flex-col gap-6 p-6">
+          <ul className="flex flex-col gap-6 p-6 items-center text-center">
             {["about", "work", "projects", "contact"].map((id) => (
               <li key={id}>
                 <a
