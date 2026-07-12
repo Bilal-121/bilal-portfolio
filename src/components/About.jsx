@@ -1,85 +1,10 @@
 import { motion } from "framer-motion";
-import { fadeInUp, staggerChildren } from "../lib/motion";
 import useParallax from "../lib/useParallax";
-
 import SectionPill from "./SectionPill";
-import {
-  SiHtml5,
-  SiCss3,
-  SiJavascript,
-  SiReact,
-  SiTailwindcss,
-  SiGit,
-  SiGithub,
-  SiPython,
-  SiFigma,
-  SiNodedotjs,
-  SiMongodb,
-  SiCanva,
-  SiMysql,
-  SiExpress,
-  SiPhp,
-  SiVercel,
-  SiRender,
-} from "react-icons/si";
-
-const techIcons = [
-  { icon: <SiHtml5 />, label: "HTML" },
-  { icon: <SiCss3 />, label: "CSS" },
-  { icon: <SiJavascript />, label: "JavaScript" },
-  { icon: <SiReact />, label: "React" },
-  { icon: <SiTailwindcss />, label: "Tailwind" },
-  { icon: <SiGit />, label: "Git" },
-  { icon: <SiGithub />, label: "GitHub" },
-  { icon: <SiPython />, label: "Python" },
-  { icon: <SiNodedotjs />, label: "Node.js" },
-  { icon: <SiMongodb />, label: "MongoDB" },
-  { icon: <SiFigma />, label: "Figma" },
-];
+import techGroups from "../data/techStack";
 
 export default function About() {
   const { ref, style } = useParallax(0.15);
-
-  const techGroups = [
-    {
-      category: "Languages",
-      techs: [
-        { icon: <SiJavascript />, label: "JavaScript" },
-        { icon: <SiPython />, label: "Python" },
-        { icon: <SiPhp />, label: "PHP" },
-        { icon: <SiHtml5 />, label: "HTML" },
-        { icon: <SiCss3 />, label: "CSS" },
-
-      ]
-    },
-    {
-      category: "Libraries & Frameworks",
-      techs: [
-        { icon: <SiReact />, label: "React" },
-        { icon: <SiNodedotjs />, label: "Node.js" },
-        { icon: <SiTailwindcss />, label: "Tailwind" },
-      ]
-    },
-    {
-      category: "Tools & Database",
-      techs: [
-        { icon: <SiGit />, label: "Git" },
-        { icon: <SiGithub />, label: "GitHub" },
-        { icon: <SiVercel />, label: "Vercel" },
-        { icon: <SiRender />, label: "Render" },
-        { icon: <SiMongodb />, label: "MongoDB" },
-        { icon: <SiMysql />, label: "MySQL" },
-        { icon: <SiExpress />, label: "Express" },
-      ]
-    },
-    {
-      category: "Design",
-      techs: [
-        { icon: <SiFigma />, label: "Figma" },
-        { icon: <SiCanva />, label: "Canva" },
-      ]
-    }
-  ];
 
   return (
     <>
@@ -91,10 +16,10 @@ export default function About() {
           className="absolute inset-0 bg-gradient-to-tr from-glow/10 via-transparent to-violet/10 blur-[100px] opacity-60 pointer-events-none"
         />
 
-        <div className="container-g relative z-10 flex flex-col md:flex-row gap-10 items-start">
+        <div className="container-g relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
           {/* About text panel - Fades in from left like opening a book */}
           <motion.div
-            className="panel p-8 rounded-2xl md:w-1/2"
+            className="panel p-8 rounded-2xl w-full"
             initial={{ 
               opacity: 0, 
               x: -100,
@@ -146,15 +71,15 @@ export default function About() {
               <span className="text-glow">React</span> and{" "}
               <span className="text-violet">Tailwind CSS</span>, 
               with a focus on detail and smooth experience. 
-              I’m always learning and improving, and right now I’m diving deeper into 
-              <span className="text-glow"> TypeScript </span> 
-              to level up my skills and build even better products.
+              I’m always learning and improving — currently building with
+              <span className="text-glow"> TypeScript </span>
+              to deliver even more robust and scalable products.
             </motion.p>
           </motion.div>
 
           {/* Tech stack panel - Fades in from right like opening a book */}
           <motion.div
-            className="panel p-6 rounded-2xl md:w-1/2"
+            className="panel p-6 rounded-2xl w-full"
             initial={{ 
               opacity: 0, 
               x: 100,
@@ -192,29 +117,30 @@ export default function About() {
                     {group.category}
                   </h4>
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-3" style={{ perspective: "1000px" }}>
-                    {group.techs.map((tech, techIndex) => (
-                      <motion.div
-                        key={techIndex}
-                        whileHover={{ 
-                          scale: 1.15,
-                          rotateY: 15,
-                          rotateX: -10,
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ 
-                          type: "spring", 
-                          stiffness: 400,
-                          damping: 15
-                        }}
-                        className="flex flex-col items-center justify-center p-3 bg-surface rounded-lg text-glow text-2xl cursor-pointer relative z-10"
-                        style={{ 
-                          transformStyle: "preserve-3d",
-                        }}
-                      >
-                        {tech.icon}
-                        <span className="text-xs mt-2 text-text/70">{tech.label}</span>
-                      </motion.div>
-                    ))}
+                    {group.techs.map((tech) => {
+                      const Icon = tech.icon;
+                      return (
+                        <motion.div
+                          key={`${group.category}-${tech.label}`}
+                          whileHover={{
+                            scale: 1.15,
+                            rotateY: 15,
+                            rotateX: -10,
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 15,
+                          }}
+                          className="flex flex-col items-center justify-center p-3 bg-surface rounded-lg text-glow text-2xl cursor-pointer relative z-10"
+                          style={{ transformStyle: "preserve-3d" }}
+                        >
+                          <Icon />
+                          <span className="text-xs mt-2 text-text/60">{tech.label}</span>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}

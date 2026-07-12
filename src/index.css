@@ -131,6 +131,27 @@
     pointer-events: none;
     filter: drop-shadow(0 0 6px rgba(168,85,247,0.5));
   }
+
+  .footer-link {
+    @apply relative inline-block hover:text-glow transition-colors duration-300 cursor-pointer z-10;
+  }
+  .footer-link::after {
+    content: '';
+    @apply absolute left-0 bottom-0 h-[1px] w-0 bg-glow transition-all duration-300;
+  }
+  .footer-link:hover::after {
+    @apply w-full;
+  }
+
+  .btn-project {
+    @apply flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg transition-all duration-300 text-sm border cursor-pointer font-semibold pointer-events-auto relative z-40;
+  }
+  .btn-project-glow {
+    @apply bg-glow/20 hover:bg-glow/40 hover:text-white hover:shadow-lg hover:shadow-glow/50 text-glow border-glow/40 hover:border-glow/80;
+  }
+  .btn-project-violet {
+    @apply bg-violet/20 hover:bg-violet/40 hover:text-white hover:shadow-lg hover:shadow-violet/50 text-violet border-violet/40 hover:border-violet/80;
+  }
 }
 /* Enables 3D hover transforms */
 .perspective {

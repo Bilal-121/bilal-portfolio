@@ -1,15 +1,14 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import heroImage from "../assets/Profile-image.jpg";
-import rocket from "../assets/rocket.svg";
+
 import { fadeInUp } from "../lib/motion";
 
 export default function Hero() {
   const ref = useRef(null);
 
-  // useScroll ties the section to scroll progress
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]); // subtle upward drift
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
 
   return (
     <section
@@ -17,20 +16,18 @@ export default function Hero() {
       id="hero"
       className="section relative min-h-[90vh] flex items-center overflow-hidden"
     >
-      {/* Floating parallax glow layer */}
       <motion.div
         style={{ y }}
         className="absolute inset-0 bg-gradient-to-tr from-violet/10 via-transparent to-glow/10 blur-[120px] opacity-70 pointer-events-none"
       />
 
       <div className="container-g relative z-10">
-        {/* Main Glass Panel */}
         <div className="panel relative overflow-hidden px-6 md:px-12 py-14 md:py-20">
           <div className="panel-gradient" />
 
           <div className="grid md:grid-cols-2 items-center gap-10 relative z-10">
-            {/* Text Section */}
-            <div>
+            {/* Text + Image (mobile) + Button */}
+            <div className="flex flex-col">
               <motion.p
                 variants={fadeInUp}
                 initial="hidden"
@@ -55,34 +52,49 @@ export default function Hero() {
                 variants={fadeInUp}
                 initial="hidden"
                 animate="show"
-                className="text-text/85 text-lg md:text-xl max-w-[42ch] mb-8"
+                className="text-text/80 text-lg md:text-xl max-w-[42ch] mb-8"
               >
-                A Front-End Engineer with a passion for crafting beautiful, 
+                A Front-End Engineer with a passion for crafting beautiful,
                 interactive web experiences.
               </motion.p>
+
+              {/* Image on mobile — between description and button */}
+              <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                animate="show"
+                className="flex justify-center mb-8 md:hidden"
+              >
+                <img
+                  src={heroImage}
+                  alt="Bilal Essakini"
+                  className="w-[200px] h-[200px] object-cover rounded-full avatar-rim"
+                  loading="lazy"
+                />
+              </motion.div>
 
               <motion.a
                 href="#about"
                 variants={fadeInUp}
                 initial="hidden"
                 animate="show"
-                className="btn-neon relative overflow-hidden"
+                className="btn-neon relative overflow-hidden self-start"
               >
                 Get to Know Me
               </motion.a>
             </div>
 
-            {/* Image Section */}
+            {/* Image on desktop — right column */}
             <motion.div
               variants={fadeInUp}
               initial="hidden"
               animate="show"
-              className="flex justify-center md:justify-end"
+              className="hidden md:flex justify-center md:justify-end"
             >
               <img
                 src={heroImage}
                 alt="Bilal Essakini"
-                className="w-[240px] h-[240px] md:w-[280px] md:h-[280px] object-cover rounded-full avatar-rim"
+                className="w-[280px] h-[280px] object-cover rounded-full avatar-rim"
                 loading="lazy"
               />
             </motion.div>

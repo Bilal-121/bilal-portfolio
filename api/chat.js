@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  const origin = process.env.ALLOWED_ORIGIN || "https://bilalessakini.com";
+  res.setHeader("Access-Control-Allow-Origin", origin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -17,22 +17,27 @@ export default async function handler(req, res) {
     const { messages } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
-      return res
-        .status(400)
-        .json({ error: "Messages array is required" });
+      return res.status(400).json({ error: "Messages array is required" });
+    }
+
+    if (messages.length > 50) {
+      return res.status(400).json({ error: "Too many messages" });
+    }
+
+    for (const msg of messages) {
+      if (typeof msg.content !== "string" || msg.content.length > 5000) {
+        return res.status(400).json({ error: "Invalid message content" });
+      }
     }
 
     if (!process.env.GOOGLE_API_KEY) {
       console.error("GOOGLE_API_KEY not found in environment");
-      return res
-        .status(500)
-        .json({ error: "Google API key not configured on server" });
+      return res.status(500).json({ error: "Google API key not configured on server" });
     }
 
     const apiKey = process.env.GOOGLE_API_KEY;
 
-    // Build the prompt for Gemini
-    const systemPrompt = `You are Bilal's AI assistant helping clients discuss web development projects. 
+    const systemPrompt = `You are Bilal's AI assistant helping clients discuss web development projects.
 
 Have a natural, friendly conversation and gradually extract:
 - Their name and email
@@ -49,14 +54,13 @@ After they respond to that question, end with: "Perfect! Your project brief has 
 
 Then add this JSON block with ALL the information collected:
 ===EXTRACT_START===
-{"readyToSend": true, "clientName": "John Doe", "clientEmail": "john@example.com", "projectType": "E-commerce", "projectDescription": "A website for selling handmade jewelry with payment integration", "timeline": "2-3 months", "budget": "$5000-$8000"} 
+{"readyToSend": true, "clientName": "John Doe", "clientEmail": "john@example.com", "projectType": "E-commerce", "projectDescription": "A website for selling handmade jewelry with payment integration", "timeline": "2-3 months", "budget": "$5000-$8000"}
 ===EXTRACT_END===
 
 IMPORTANT: Always include timeline and budget fields in the JSON when you have that information.
 
 If you just have partial info, include the extracted fields WITHOUT "readyToSend". Only add "readyToSend": true when you have ALL information and the conversation is complete.`;
 
-    // Build conversation history
     let conversationText = `${systemPrompt}\n\n`;
     for (const msg of messages) {
       const role = msg.role === "user" ? "User" : "Assistant";
@@ -64,20 +68,13 @@ If you just have partial info, include the extracted fields WITHOUT "readyToSend
     }
     conversationText += `Assistant:`;
 
-    // Call Google Gemini API via REST
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: conversationText }],
-            },
-          ],
+          contents: [{ parts: [{ text: conversationText }] }],
         }),
       }
     );
@@ -91,11 +88,9 @@ If you just have partial info, include the extracted fields WITHOUT "readyToSend
       });
     }
 
-    // Extract AI response
     const aiResponse =
       data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm here to help!";
 
-    // Extract JSON if present
     const extractMatch = aiResponse.match(
       /===EXTRACT_START===\n([\s\S]*?)\n===EXTRACT_END===/
     );
@@ -109,7 +104,6 @@ If you just have partial info, include the extracted fields WITHOUT "readyToSend
       }
     }
 
-    // Remove extraction block from displayed message
     const displayMessage = aiResponse
       .replace(/===EXTRACT_START===[\s\S]*?===EXTRACT_END===/g, "")
       .trim();

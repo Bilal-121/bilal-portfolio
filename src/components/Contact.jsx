@@ -3,22 +3,22 @@ import { fadeInUp } from "../lib/motion";
 import SectionPill from "./SectionPill";
 import { useState, useRef, useEffect } from "react";
 import { FiSend } from "react-icons/fi";
+import { trackEvent } from "../lib/analytics";
 
 export default function Contact() {
-  const [contactType, setContactType] = useState("customer"); // 'customer' or 'recruiter'
+  const [contactType, setContactType] = useState("customer");
   const [sent, setSent] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Recruiter form data
+
   const [formData, setFormData] = useState({
-    firstName: '',
+    name: '',
     email: '',
     message: ''
   });
   const [errors, setErrors] = useState({});
+  const [emailVerified, setEmailVerified] = useState(null);
+  const [verifyingEmail, setVerifyingEmail] = useState(false);
 
-  // Chatbot state
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -41,10 +41,8 @@ export default function Contact() {
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
-  // Auto-scroll chat to bottom (only scroll within chat container, not page)
   useEffect(() => {
     if (messages.length > 1 && chatContainerRef.current) {
-      // Scroll only within the chat container, not the entire page
       setTimeout(() => {
         if (chatContainerRef.current) {
           chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -53,12 +51,10 @@ export default function Contact() {
     }
   }, [messages]);
 
-  // Merge extracted data from AI responses
   const mergeExtractedData = (newData) => {
     if (!newData) return;
     setProjectData(prev => ({
       ...prev,
-      // Only update fields that have actual values
       ...(newData.clientName && { name: newData.clientName }),
       ...(newData.clientEmail && { email: newData.clientEmail }),
       ...(newData.projectType && { projectType: newData.projectType }),
@@ -68,7 +64,6 @@ export default function Contact() {
     }));
   };
 
-  // Sanitize input to prevent XSS attacks
   const sanitizeInput = (input) => {
     if (typeof input !== 'string') return '';
     return input
@@ -77,7 +72,6 @@ export default function Contact() {
       .replace(/on\w+=/gi, '');
   };
 
-  // Validate budget and check market rates
   const validateBudget = (budget, projectType) => {
     const budgetNum = parseFloat(budget.replace(/[^0-9.]/g, ''));
     const marketRates = {
@@ -89,12 +83,12 @@ export default function Contact() {
       "default": { min: 1000, max: 15000 }
     };
 
-    const type = Object.keys(marketRates).find(key => 
+    const type = Object.keys(marketRates).find(key =>
       projectType.toLowerCase().includes(key)
     ) || "default";
-    
+
     const rates = marketRates[type];
-    
+
     if (budgetNum < rates.min) {
       return {
         isReasonable: false,
@@ -124,23 +118,16 @@ export default function Contact() {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = userInput;
     setUserInput("");
     setIsTyping(true);
 
     try {
-      // Build conversation history for the API
       const conversationHistory = [...messages, userMessage];
 
-      // Call the Vercel API
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: conversationHistory
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: conversationHistory })
       });
 
       const contentType = response.headers.get("content-type") || "";
@@ -157,13 +144,11 @@ export default function Contact() {
         const apiError = data?.error || rawText || "Failed to get AI response";
         throw new Error(apiError);
       }
-      
-      // Merge extracted data from AI
+
       if (data.extractedData) {
         mergeExtractedData(data.extractedData);
       }
 
-      // Add AI response to messages
       const assistantMessage = {
         id: messages.length + 2,
         role: "assistant",
@@ -173,9 +158,8 @@ export default function Contact() {
       setMessages(prev => [...prev, assistantMessage]);
       setChatStep(prev => prev + 1);
 
-      // Check if conversation is ready to send
       if (data.extractedData?.readyToSend === true) {
-        // Build complete project data from extracted data
+        trackEvent("project_brief_sent", { type: "customer" });
         const completeProjectData = {
           name: data.extractedData.clientName || projectData.name,
           email: data.extractedData.clientEmail || projectData.email,
@@ -184,8 +168,7 @@ export default function Contact() {
           timeline: data.extractedData.timeline || projectData.timeline,
           budget: data.extractedData.budget || projectData.budget
         };
-        
-        // Send the brief immediately with the complete data
+
         sendProjectBrief(completeProjectData, [...conversationHistory, assistantMessage]);
       }
 
@@ -194,7 +177,7 @@ export default function Contact() {
       const errorMessage = {
         id: messages.length + 2,
         role: "assistant",
-        content: `Our chat service is temporarily unavailable. Please try again in a moment, or refresh the page if the issue persists.`
+        content: "Our chat service is temporarily unavailable. Please try again in a moment, or refresh the page if the issue persists."
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -203,10 +186,9 @@ export default function Contact() {
   };
 
   const sendProjectBrief = async (data, fullConversation) => {
-    // Simulate sending email with project brief
     const brief = {
       type: 'PROJECT_BRIEF',
-      clientType: 'New Client', // Default to "New Client" (add database tracking later for returning clients)
+      clientType: 'New Client',
       contactInfo: {
         name: data.name,
         email: data.email
@@ -220,15 +202,12 @@ export default function Contact() {
       budgetAnalysis: validateBudget(data.budget, data.projectType),
       timestamp: new Date().toISOString()
     };
-    
+
     try {
-      // Call the serverless function to send email
       const response = await fetch("/api/send-email", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           projectBrief: brief,
           conversationHistory: fullConversation || messages
         })
@@ -238,17 +217,13 @@ export default function Contact() {
         throw new Error("Failed to send project brief");
       }
 
-      const result = await response.json();
-      
-      console.log("📧 Project Brief sent:", brief);
-      console.log("📧 Conversation copy sent to customer");
       return brief;
     } catch (error) {
       console.error("Error sending brief:", error);
       const errorMessage = {
         id: messages.length + 1,
         role: "assistant",
-        content: `I had trouble sending your project brief. No worries! Please try again, or use the connection form to manually share your project details with Bilal. 📧`
+        content: "I had trouble sending your project brief. No worries! Please try again, or use the connection form to manually share your project details with Bilal."
       };
       setMessages(prev => [...prev, errorMessage]);
       throw error;
@@ -259,44 +234,64 @@ export default function Contact() {
     setUserInput(suggestion);
   };
 
-  // Recruiter form handlers
+  const validateEmail = async (email) => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+
+    setVerifyingEmail(true);
+    try {
+      const response = await fetch("/api/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await response.json();
+      setEmailVerified(data.valid);
+      if (!data.valid) {
+        setErrors(prev => ({ ...prev, email: data.reason }));
+      } else {
+        setErrors(prev => ({ ...prev, email: '' }));
+      }
+    } catch {
+      setEmailVerified(null);
+    } finally {
+      setVerifyingEmail(false);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'email') setEmailVerified(null);
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'Name is required';
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
+    } else if (emailVerified === false) {
+      newErrors.email = 'This email could not be verified';
     }
-    
+
     if (!formData.message.trim()) {
       newErrors.message = 'Message is required';
     }
-    
+
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
@@ -304,21 +299,19 @@ export default function Contact() {
     }
 
     setIsSubmitting(true);
-    
+
     const sanitizedData = {
       type: 'RECRUITER_CONTACT',
-      firstName: sanitizeInput(formData.firstName.trim()),
+      name: sanitizeInput(formData.name.trim()),
       email: formData.email.trim().toLowerCase(),
       message: sanitizeInput(formData.message.trim()),
       timestamp: new Date().toISOString()
     };
-    
+
     try {
       const response = await fetch('/api/send-recruiter-email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sanitizedData)
       });
 
@@ -328,7 +321,7 @@ export default function Contact() {
         throw new Error(data.error || 'Failed to send message');
       }
 
-      console.log('✅ Recruiter contact form submitted successfully');
+      trackEvent("contact_form_submit", { type: "recruiter" });
       setSent(true);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -341,11 +334,10 @@ export default function Contact() {
   return (
     <section className="section relative overflow-hidden">
       <SectionPill id="contact" title="Get In Touch" />
-      
+
       <div className="absolute inset-0 bg-gradient-to-b from-violet/10 via-transparent to-glow/10 opacity-0 blur-3xl pointer-events-none" />
 
       <div className="container-g relative z-10">
-        {/* Contact Type Selector */}
         <motion.div
           variants={fadeInUp}
           initial="hidden"
@@ -375,7 +367,6 @@ export default function Contact() {
           </button>
         </motion.div>
 
-        {/* Customer Chatbot View */}
         {contactType === "customer" && (
           <motion.div
             key="customer"
@@ -386,7 +377,6 @@ export default function Contact() {
             className="max-w-4xl mx-auto"
           >
             <div className="grid md:grid-cols-5 gap-8 items-start">
-              {/* Left Side - Headline */}
               <div className="md:col-span-2 space-y-6">
                 <motion.h2
                   variants={fadeInUp}
@@ -398,13 +388,13 @@ export default function Contact() {
                   Let's build your{" "}
                   <span className="gradient-text">next big thing</span>.
                 </motion.h2>
-                
+
                 <motion.p
                   variants={fadeInUp}
                   initial="hidden"
                   whileInView="show"
                   viewport={{ once: true }}
-                  className="text-text/70 text-lg"
+                  className="text-text/60 text-lg"
                 >
                   Skip the formalities. Chat with my AI assistant to generate a project brief instantly.
                 </motion.p>
@@ -416,7 +406,7 @@ export default function Contact() {
                   viewport={{ once: true }}
                   className="flex items-start gap-3 text-sm text-text/60"
                 >
-                  <span className="text-glow">✓</span>
+                  <span className="text-glow">&#10003;</span>
                   <span>Fast Response</span>
                 </motion.div>
                 <motion.div
@@ -426,7 +416,7 @@ export default function Contact() {
                   viewport={{ once: true }}
                   className="flex items-start gap-3 text-sm text-text/60"
                 >
-                  <span className="text-glow">✓</span>
+                  <span className="text-glow">&#10003;</span>
                   <span>Budget Analysis</span>
                 </motion.div>
                 <motion.div
@@ -436,12 +426,11 @@ export default function Contact() {
                   viewport={{ once: true }}
                   className="flex items-start gap-3 text-sm text-text/60"
                 >
-                  <span className="text-glow">✓</span>
+                  <span className="text-glow">&#10003;</span>
                   <span>No Commitment</span>
                 </motion.div>
               </div>
 
-              {/* Right Side - Chat Interface */}
               <motion.div
                 variants={fadeInUp}
                 initial="hidden"
@@ -450,10 +439,11 @@ export default function Contact() {
                 className="md:col-span-3 panel p-6 rounded-2xl relative overflow-hidden"
               >
                 <div className="panel-gradient" />
-                
-                {/* Chat Messages */}
+
                 <div
                   ref={chatContainerRef}
+                  role="log"
+                  aria-live="polite"
                   className="relative z-10 h-[400px] overflow-y-auto mb-4 space-y-4 pr-2 chat-scrollbar"
                 >
                   {messages.map((message) => (
@@ -472,7 +462,7 @@ export default function Contact() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {isTyping && (
                     <div className="flex justify-start">
                       <div className="bg-slate-800/90 border border-slate-700/50 px-4 py-3 rounded-2xl">
@@ -484,11 +474,10 @@ export default function Contact() {
                       </div>
                     </div>
                   )}
-                  
+
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Chat Input */}
                 <form onSubmit={handleChatSubmit} className="relative z-10 flex gap-2">
                   <input
                     type="text"
@@ -501,6 +490,7 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={!userInput.trim() || isTyping}
+                    aria-label="Send message"
                     className="bg-glow hover:bg-glow/90 text-bg p-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <FiSend size={20} />
@@ -511,7 +501,6 @@ export default function Contact() {
           </motion.div>
         )}
 
-        {/* Connect View */}
         {contactType === "recruiter" && (
           <motion.div
             key="recruiter"
@@ -549,26 +538,26 @@ export default function Contact() {
                   noValidate
                 >
                   <div className="text-left relative z-10">
-                    <label htmlFor="firstName" className="sr-only">
+                    <label htmlFor="name" className="sr-only">
                       Your Name
                     </label>
-                    <input 
-                      name="firstName" 
-                      id="firstName" 
-                      type="text" 
+                    <input
+                      name="name"
+                      id="name"
+                      type="text"
                       placeholder="Your Name"
-                      value={formData.firstName}
+                      value={formData.name}
                       onChange={handleChange}
                       disabled={isSubmitting}
                       required
                       maxLength={100}
                       className={`w-full bg-surface border ${
-                        errors.firstName ? 'border-red-500' : 'border-border'
+                        errors.name ? 'border-red-500' : 'border-border'
                       } rounded-lg p-3 text-text placeholder:text-text/40 focus:border-glow focus:ring-1 focus:ring-glow focus:outline-none transition disabled:opacity-50`}
                     />
-                    {errors.firstName && (
-                      <span className="text-red-500 text-sm mt-1 block">
-                        {errors.firstName}
+                    {errors.name && (
+                      <span className="text-red-500 text-sm mt-1 block" role="alert">
+                        {errors.name}
                       </span>
                     )}
                   </div>
@@ -577,22 +566,31 @@ export default function Contact() {
                     <label htmlFor="email" className="sr-only">
                       Your Email
                     </label>
-                    <input
-                      name="email"
-                      type="email"
-                      id="email"
-                      placeholder="Your Email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      disabled={isSubmitting}
-                      required
-                      maxLength={150}
-                      className={`w-full bg-surface border ${
-                        errors.email ? 'border-red-500' : 'border-border'
-                      } rounded-lg p-3 text-text placeholder:text-text/40 focus:border-glow focus:ring-1 focus:ring-glow focus:outline-none transition disabled:opacity-50`}
-                    />
+                    <div className="relative">
+                      <input
+                        name="email"
+                        type="email"
+                        id="email"
+                        placeholder="Your Email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        onBlur={(e) => validateEmail(e.target.value)}
+                        disabled={isSubmitting}
+                        required
+                        maxLength={150}
+                        className={`w-full bg-surface border ${
+                          errors.email ? 'border-red-500' : emailVerified === true ? 'border-green-500' : 'border-border'
+                        } rounded-lg p-3 text-text placeholder:text-text/40 focus:border-glow focus:ring-1 focus:ring-glow focus:outline-none transition disabled:opacity-50`}
+                      />
+                      {verifyingEmail && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text/40 text-xs">Verifying...</span>
+                      )}
+                      {!verifyingEmail && emailVerified === true && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">&#10003;</span>
+                      )}
+                    </div>
                     {errors.email && (
-                      <span className="text-red-500 text-sm mt-1 block">
+                      <span className="text-red-500 text-sm mt-1 block" role="alert">
                         {errors.email}
                       </span>
                     )}
@@ -616,15 +614,20 @@ export default function Contact() {
                         errors.message ? 'border-red-500' : 'border-border'
                       } rounded-lg p-3 text-text placeholder:text-text/40 focus:border-glow focus:ring-1 focus:ring-glow focus:outline-none transition resize-none disabled:opacity-50`}
                     />
-                    {errors.message && (
-                      <span className="text-red-500 text-sm mt-1 block">
-                        {errors.message}
+                    <div className="flex justify-between items-center mt-1">
+                      {errors.message ? (
+                        <span className="text-red-500 text-sm" role="alert">
+                          {errors.message}
+                        </span>
+                      ) : <span />}
+                      <span className={`text-xs ${formData.message.length > 900 ? 'text-red-400' : 'text-text/40'}`}>
+                        {formData.message.length}/1000
                       </span>
-                    )}
+                    </div>
                   </div>
 
                   {errors.submit && (
-                    <div className="text-red-500 text-sm text-center">
+                    <div className="text-red-500 text-sm text-center" role="alert">
                       {errors.submit}
                     </div>
                   )}
@@ -632,18 +635,11 @@ export default function Contact() {
                   <motion.button
                     type="submit"
                     disabled={isSubmitting}
-                    onHoverStart={() => !isSubmitting && setHovered(true)}
-                    onHoverEnd={() => setHovered(false)}
+                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                     className="relative btn-neon font-semibold text-base tracking-wide py-3 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span className="relative z-10">
-                      {isSubmitting ? "Sending..." : hovered ? "Send Now!" : "Send Message"}
-                    </span>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: hovered && !isSubmitting ? 1 : 0 }}
-                      className="absolute inset-0 bg-glow/20 blur-md rounded-lg pointer-events-none"
-                    />
+                    {isSubmitting ? "Sending..." : "Send Message"}
                   </motion.button>
                 </form>
               ) : (
@@ -652,7 +648,7 @@ export default function Contact() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center mt-6 text-lg text-glow font-body"
                 >
-                  Message sent successfully ✨ I'll get back to you soon.
+                  Message sent successfully! I'll get back to you soon.
                 </motion.div>
               )}
             </motion.div>

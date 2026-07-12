@@ -1,55 +1,70 @@
 import { Resend } from 'resend';
 
+function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export default async function handler(req, res) {
-  // Only allow POST requests
+  const origin = process.env.ALLOWED_ORIGIN || "https://bilalessakini.com";
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY not found in environment');
-    return res.status(500).json({
-      error: 'Email service not configured on server',
-    });
+    return res.status(500).json({ error: 'Email service not configured on server' });
+  }
+
+  const contactEmail = process.env.CONTACT_EMAIL;
+  if (!contactEmail) {
+    console.error('CONTACT_EMAIL not found in environment');
+    return res.status(500).json({ error: 'Contact email not configured on server' });
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   try {
-    const { firstName, email, message, timestamp } = req.body;
+    const { name, email, message, timestamp } = req.body;
 
-    // Validate required fields
-    if (!firstName || !email || !message) {
-      return res.status(400).json({ 
+    if (!name || !email || !message) {
+      return res.status(400).json({
         error: 'Missing required fields',
-        details: 'firstName, email, and message are required'
+        details: 'name, email, and message are required'
       });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ 
-        error: 'Invalid email format'
-      });
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // Format timestamp
-    const formattedDate = timestamp 
-      ? new Date(timestamp).toLocaleString('en-US', { 
-          dateStyle: 'full', 
-          timeStyle: 'short' 
-        })
-      : new Date().toLocaleString('en-US', { 
-          dateStyle: 'full', 
-          timeStyle: 'short' 
-        });
+    const formattedDate = timestamp
+      ? new Date(timestamp).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })
+      : new Date().toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' });
 
-    // Send email to Bilal
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeMessage = escapeHtml(message);
+
     const { data, error } = await resend.emails.send({
       from: 'Portfolio Connection <onboarding@resend.dev>',
-      to: 'essakinibilal14@gmail.com',
-      subject: `🤝 Portfolio Connection Request from ${firstName}`,
+      to: contactEmail,
+      subject: `Portfolio Connection Request from ${safeName}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -108,32 +123,32 @@ export default async function handler(req, res) {
           </head>
           <body>
             <div class="header">
-              <h1 style="margin: 0; font-size: 24px;">🤝 Portfolio Connection Request</h1>
+              <h1 style="margin: 0; font-size: 24px;">Portfolio Connection Request</h1>
               <p style="margin: 10px 0 0 0; opacity: 0.9;">New connection request from your portfolio</p>
             </div>
-            
+
             <div class="content">
               <div class="field">
                 <div class="label">Name:</div>
-                <div class="value">${firstName}</div>
+                <div class="value">${safeName}</div>
               </div>
 
               <div class="field">
                 <div class="label">Email:</div>
                 <div class="value">
-                  <a href="mailto:${email}" style="color: #667eea; text-decoration: none;">
-                    ${email}
+                  <a href="mailto:${safeEmail}" style="color: #667eea; text-decoration: none;">
+                    ${safeEmail}
                   </a>
                 </div>
               </div>
 
               <div class="field">
                 <div class="label">Message:</div>
-                <div class="message-box">${message}</div>
+                <div class="message-box">${safeMessage}</div>
               </div>
 
               <div class="footer">
-                <strong>Received:</strong> ${formattedDate}<br>
+                <strong>Received:</strong> ${escapeHtml(formattedDate)}<br>
                 <strong>Type:</strong> Portfolio Connection<br>
                 <strong>Source:</strong> Portfolio Contact Form
               </div>
@@ -144,25 +159,24 @@ export default async function handler(req, res) {
     });
 
     if (error) {
-      console.error('❌ Portfolio connection email error:', error);
-      return res.status(500).json({ 
+      console.error('Portfolio connection email error:', error);
+      return res.status(500).json({
         error: 'Failed to send email',
-        details: error.message 
+        details: error.message
       });
     }
 
-    console.log('✅ Portfolio connection email sent successfully:', data);
-    return res.status(200).json({ 
+    return res.status(200).json({
       success: true,
       message: 'Email sent successfully',
-      emailId: data.id 
+      emailId: data.id
     });
 
   } catch (error) {
-    console.error('❌ Portfolio connection email error:', error);
-    return res.status(500).json({ 
+    console.error('Portfolio connection email error:', error);
+    return res.status(500).json({
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     });
   }
 }
