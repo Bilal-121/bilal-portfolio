@@ -55,7 +55,7 @@ export default function Hero() {
                 animate="show"
                 className="text-text/80 text-lg md:text-xl max-w-[42ch] mb-8"
               >
-                A Front-End Engineer with a passion for crafting beautiful,
+                A Front-End Developer with a passion for crafting beautiful,
                 interactive web experiences.
               </motion.p>
 
