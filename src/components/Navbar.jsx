@@ -4,6 +4,7 @@ import { FiMenu, FiX } from "react-icons/fi";
 import LiveInfo from "./LiveInfo";
 import { siteConfig } from "../lib/siteConfig";
 import { trackEvent } from "../lib/analytics";
+import { getPathForSection, navigateToSection } from "../lib/navigation";
 
 const NAV_SECTIONS = [
   { id: "about", label: "About" },
@@ -21,7 +22,12 @@ export default function Navbar() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+            const id = entry.target.id;
+            setActiveSection(id);
+            const path = getPathForSection(id);
+            if (window.location.pathname !== path) {
+              window.history.replaceState({ section: id }, "", path);
+            }
           }
         });
       },
@@ -33,14 +39,24 @@ export default function Navbar() {
       if (el) observer.observe(el);
     });
 
+    const heroEl = document.getElementById("hero");
+    if (heroEl) observer.observe(heroEl);
+
     return () => observer.disconnect();
   }, []);
+
+  const handleNav = (e, sectionId) => {
+    e.preventDefault();
+    navigateToSection(sectionId);
+    setIsOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-background/35 backdrop-blur-md border-b border-border">
       <nav className="container-g flex justify-between items-center py-5 md:py-6">
         <a
-          href="#hero"
+          href="/"
+          onClick={(e) => handleNav(e, "hero")}
           className="font-heading text-2xl gradient-text tracking-widest"
         >
           BE
@@ -50,7 +66,8 @@ export default function Navbar() {
           {NAV_SECTIONS.map(({ id, label }) => (
             <li key={id}>
               <a
-                href={`#${id}`}
+                href={getPathForSection(id)}
+                onClick={(e) => handleNav(e, id)}
                 className={`transition ${
                   activeSection === id
                     ? "text-glow"
@@ -100,8 +117,8 @@ export default function Navbar() {
               {NAV_SECTIONS.map(({ id, label }) => (
                 <li key={id}>
                   <a
-                    href={`#${id}`}
-                    onClick={() => setIsOpen(false)}
+                    href={getPathForSection(id)}
+                    onClick={(e) => handleNav(e, id)}
                     className={`transition ${
                       activeSection === id ? "text-glow" : "hover:text-glow"
                     }`}

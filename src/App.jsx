@@ -8,9 +8,9 @@ import Projects from "./components/Projects";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import ScrollToTopButton from "./components/ScrollToTopButton";
+import { getSectionForPath, navigateToSection } from "./lib/navigation";
 
 export default function App() {
-  // Prevent page scroll jumping on load
   useEffect(() => {
     window.history.scrollRestoration = "manual";
   }, []);
@@ -31,9 +31,28 @@ export default function App() {
     return () => lenis.destroy();
   }, []);
 
+  useEffect(() => {
+    const sectionId = getSectionForPath(window.location.pathname);
+    if (sectionId !== "hero") {
+      requestAnimationFrame(() => {
+        navigateToSection(sectionId, { instant: true });
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = (e) => {
+      const sectionId = e.state?.section || getSectionForPath(window.location.pathname);
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   return (
     <>
-      {/* accessibility skip link */}
       <a
         href="#main"
         className="sr-only focus:not-sr-only absolute top-2 left-2 z-[9999] bg-glow text-background px-4 py-2 rounded-md"
@@ -42,9 +61,6 @@ export default function App() {
       </a>
 
       <Navbar />
-
-      {/* background glows */}
-      
 
       <main id="main" tabIndex={-1}>
         <Hero />

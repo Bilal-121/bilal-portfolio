@@ -1,7 +1,13 @@
 import { motion } from "framer-motion";
 import { siteConfig } from "../lib/siteConfig";
+import { getPathForSection, navigateToSection } from "../lib/navigation";
 
 export default function Footer() {
+  const handleNav = (e, sectionId) => {
+    e.preventDefault();
+    navigateToSection(sectionId);
+  };
+
   return (
     <footer className="relative section text-center text-sm text-text/60 pt-0 pb-0">
       <motion.div
@@ -29,10 +35,10 @@ export default function Footer() {
           <div className="col-span-6 md:col-span-4">
             <h3 className="mb-4 text-sm font-semibold text-text/80 uppercase tracking-wide">Explore</h3>
             <ul className="space-y-3">
-              <li><a href="#hero" className="footer-link">Home</a></li>
-              <li><a href="#about" className="footer-link">About</a></li>
-              <li><a href="#projects" className="footer-link">Projects</a></li>
-              <li><a href="#work" className="footer-link">Experience</a></li>
+              <li><a href="/" onClick={(e) => handleNav(e, "hero")} className="footer-link">Home</a></li>
+              <li><a href={getPathForSection("about")} onClick={(e) => handleNav(e, "about")} className="footer-link">About</a></li>
+              <li><a href={getPathForSection("projects")} onClick={(e) => handleNav(e, "projects")} className="footer-link">Projects</a></li>
+              <li><a href={getPathForSection("work")} onClick={(e) => handleNav(e, "work")} className="footer-link">Experience</a></li>
             </ul>
           </div>
 
@@ -60,7 +66,7 @@ export default function Footer() {
           <div className="col-span-12 md:col-span-4">
             <h3 className="mb-4 text-sm font-semibold text-text/80 uppercase tracking-wide">Contact</h3>
             <ul className="space-y-3">
-              <li><a href="#contact" className="footer-link">Contact Form</a></li>
+              <li><a href={getPathForSection("contact")} onClick={(e) => handleNav(e, "contact")} className="footer-link">Contact Form</a></li>
               <li>
                 <a href={siteConfig.resumePath} target="_blank" rel="noopener noreferrer" className="footer-link">
                   Resume

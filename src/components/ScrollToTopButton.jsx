@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import rocket from "../assets/rocket.svg";
+import { navigateToSection } from "../lib/navigation";
 
 export default function ScrollToTopButton() {
   const [showButton, setShowButton] = useState(false);
@@ -15,8 +16,12 @@ export default function ScrollToTopButton() {
     <AnimatePresence>
       {showButton && (
         <motion.a
-          href="#hero"
+          href="/"
           title="Back to top"
+          onClick={(e) => {
+            e.preventDefault();
+            navigateToSection("hero");
+          }}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 30 }}

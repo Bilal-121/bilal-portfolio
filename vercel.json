@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    { "source": "/about-me", "destination": "/" },
+    { "source": "/work-experience", "destination": "/" },
+    { "source": "/projects", "destination": "/" },
+    { "source": "/contact", "destination": "/" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

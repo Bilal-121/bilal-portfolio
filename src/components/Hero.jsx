@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import heroImage from "../assets/Profile-image.jpg";
 
 import { fadeInUp } from "../lib/motion";
+import { navigateToSection } from "../lib/navigation";
 
 export default function Hero() {
   const ref = useRef(null);
@@ -74,7 +75,11 @@ export default function Hero() {
               </motion.div>
 
               <motion.a
-                href="#about"
+                href="/about-me"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigateToSection("about");
+                }}
                 variants={fadeInUp}
                 initial="hidden"
                 animate="show"

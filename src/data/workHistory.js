@@ -1,10 +1,10 @@
 const workHistory = [
   {
     title: "Data Acquisition Engineer",
-    company: "Open Signal",
+    company: "OpenSignal",
     period: "December 2025 – Present",
     description:
-      "Designing and implementing scalable data pipelines to collect and process mobile network performance data. Collaborating with cross-functional teams to optimize data acquisition strategies and ensure high-quality insights.",
+      "Building and maintaining PHP-based data-collection systems and web scrapers. Managing proxy pools, CI/CD pipelines in GitLab, and troubleshooting scraper failures to support SLA-driven daily data feeds. Collaborating with engineering, product, and data-quality teams to drive continuous improvement.",
   },
   {
     title: "Web Developer",
