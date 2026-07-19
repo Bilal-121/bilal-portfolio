@@ -2,27 +2,48 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
+    screens: {
+      sm: "480px",
+      tablet: "768px",
+      md: "768px",
+      laptop: "1024px",
+      lg: "1024px",
+      desktop: "1440px",
+      xl: "1440px",
+      wide: "1920px",
+      "2xl": "1920px",
+    },
     extend: {
       colors: {
-        background: "#070510",
-        surface: "rgba(255,255,255,0.04)",
-        border: "rgba(255,255,255,0.08)",
-        glow: "#5CE1E6",
-        violet: "#A855F7",
+        bg: "#0B0B0E",
+        "bg-raised": "#131317",
         text: {
-          DEFAULT: "#E2E6F0",
-          muted: "#9BA2B0",
+          primary: "#F2F1ED",
+          secondary: "#9A9A9F",
+          muted: "#86868C",
         },
+        accent: {
+          DEFAULT: "#2DD4BF",
+          dim: "#1B7A70",
+        },
+        border: "#232327",
+        error: "#F26B5E",
       },
       fontFamily: {
         heading: ["Space Grotesk", "sans-serif"],
         body: ["Inter", "sans-serif"],
-      },
-      boxShadow: {
-        glow: "0 0 60px rgba(92,225,230,0.25)",
+        mono: ["JetBrains Mono", "monospace"],
       },
       maxWidth: {
-        content: "72rem",
+        content: "90rem",
+      },
+      transitionTimingFunction: {
+        primary: "cubic-bezier(0.16, 1, 0.3, 1)",
+      },
+      transitionDuration: {
+        micro: "200ms",
+        reveal: "700ms",
+        page: "500ms",
       },
     },
   },

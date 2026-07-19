@@ -2,163 +2,132 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Fluid type scale — desktop/mobile pairs from the design tokens, clamped across the viewport range */
+  --text-display: clamp(2.75rem, 1.4rem + 6.5vw, 5.5rem);
+  --text-h1: clamp(2rem, 1.2rem + 3.5vw, 3rem);
+  --text-h2: clamp(1.375rem, 1.1rem + 1.2vw, 1.75rem);
+  --text-body-lg: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
+  --text-body: 1rem;
+  --text-label: 0.8125rem;
+
+  /* Spacing rhythm */
+  --space-section-y: 96px;
+  --space-block: 48px;
+  --space-element: 24px;
+  --space-tight: 8px;
+
+  /* Motion */
+  --ease-primary: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-micro: 200ms;
+  --duration-reveal: 700ms;
+  --duration-page: 500ms;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --space-section-y: 160px;
+  }
+}
+
 @layer base {
   body {
-    @apply bg-background text-text font-body antialiased;
-    background:
-      radial-gradient(1200px 800px at 85% -10%, #5CE1E6 0%, transparent 70%),
-      radial-gradient(1000px 700px at -10% 20%, #A855F7 0%, transparent 60%),
-      #070510;
-    color: #E2E6F0;
+    @apply bg-bg text-text-primary font-body antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-heading;
+    letter-spacing: -0.02em;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.accent.DEFAULT');
+    outline-offset: 2px;
   }
 }
 
 @layer components {
   .container-g {
-    @apply max-w-content mx-auto px-5 md:px-8;
+    @apply max-w-content mx-auto px-6 desktop:px-24;
   }
 
   .section {
-    @apply py-24 md:py-32;
+    padding-top: var(--space-section-y);
+    padding-bottom: var(--space-section-y);
   }
-  .sub-section{
-    @apply pt-0 pb-10 md:pt-0 md:pb-10;
-  }
-
-  /* panel + glow styles */
-  .panel {
-    position: relative;
-    /*background: rgba(255, 255, 255, 0.035);*/
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    box-shadow:
-      0 6px 30px rgba(92,225,230,0.08),
-      0 1px 0 rgba(255,255,255,0.04) inset,
-      0 -1px 0 rgba(0,0,0,0.2) inset;
-    backdrop-filter: blur(20px);
+  .sub-section {
+    @apply pt-0 pb-10;
   }
 
-  .panel::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.06),
-      inset 0 -1px 0 rgba(255,255,255,0.06);
+  .surface {
+    @apply relative bg-bg-raised border border-border rounded-2xl;
   }
 
-  .panel-gradient {
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background:
-      radial-gradient(600px 320px at 15% 15%, rgba(168,85,247,0.18), transparent 60%),
-      radial-gradient(600px 320px at 85% 25%, rgba(92,225,230,0.18), transparent 60%);
-    pointer-events: none;
+  .text-display {
+    font-size: var(--text-display);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  .text-h1 {
+    font-size: var(--text-h1);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+  .text-h2 {
+    font-size: var(--text-h2);
+    line-height: 1.22;
+  }
+  .text-body-lg {
+    font-size: var(--text-body-lg);
+    line-height: 1.5;
+  }
+  .label {
+    @apply font-mono uppercase text-accent;
+    font-size: var(--text-label);
+    line-height: 1.4;
+    letter-spacing: 0.08em;
   }
 
-  .section-pill {
-    @apply w-full rounded-[20px] border border-border backdrop-blur-sm;
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,0.04) inset,
-      0 10px 30px rgba(0,0,0,0.25);
-    background: rgb(22 22 24 / 98%);
+  .hairline {
+    @apply w-full border-t border-border;
   }
 
-  .section-pill h2 {
-    @apply px-6 py-5 text-3xl md:text-4xl font-heading;
-    background: linear-gradient(90deg, #5CE1E6 0%, #A855F7 60%);
-    -webkit-background-clip: text;
-    color: transparent;
+  .btn-pill {
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 border border-border text-sm font-medium text-text-primary transition-colors;
+    transition-duration: var(--duration-micro);
+    transition-timing-function: var(--ease-primary);
   }
-
-  .gradient-text {
-    background: linear-gradient(90deg, #5CE1E6, #A855F7);
-    -webkit-background-clip: text;
-    color: transparent;
+  .btn-pill:hover {
+    @apply border-accent text-accent;
   }
-
-  .soft-divider {
-    height: 1px;
-    width: 100%;
-    background: linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0.08) 20%,
-      rgba(255,255,255,0.08) 80%,
-      rgba(255,255,255,0) 100%
-    );
+  .btn-pill-filled {
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 bg-accent text-bg text-sm font-medium transition-opacity;
+    transition-duration: var(--duration-micro);
   }
-
-  .btn-neon {
-    @apply inline-flex items-center justify-center rounded-lg px-5 py-2 border text-sm;
-    border-color: #5CE1E6;
-    color: #5CE1E6;
-    transition: all 0.25s ease;
-  }
-
-  .btn-neon:hover {
-    background: #5CE1E6;
-    color: #070510;
-    box-shadow: 0 0 24px rgba(92,225,230,0.35);
-  }
-
-  .hover-glow:hover {
-    box-shadow: 0 0 30px rgba(92,225,230,0.35);
-    transition: box-shadow 0.3s ease;
-  }
-
-  .always-glow {
-    box-shadow: 0 0 30px rgba(92,225,230,0.25);
-  }
-
-  .avatar-rim {
-    border-radius: 9999px;
-    border: 2px solid #5CE1E6;
-    box-shadow: 0 0 0 3px rgba(168,85,247,0.35),
-                0 0 32px rgba(92,225,230,0.32);
-  }
-
-  .stars {
-    position: absolute;
-    right: 2%;
-    top: 10%;
-    width: 260px;
-    height: 260px;
-    opacity: 0.45;
-    pointer-events: none;
-    filter: drop-shadow(0 0 6px rgba(168,85,247,0.5));
+  .btn-pill-filled:hover {
+    opacity: 0.85;
   }
 
   .footer-link {
-    @apply relative inline-block hover:text-glow transition-colors duration-300 cursor-pointer z-10;
+    @apply relative inline-block text-text-secondary hover:text-accent transition-colors cursor-pointer z-10;
+    transition-duration: var(--duration-micro);
   }
   .footer-link::after {
     content: '';
-    @apply absolute left-0 bottom-0 h-[1px] w-0 bg-glow transition-all duration-300;
+    @apply absolute left-0 bottom-0 h-[1px] w-0 bg-accent transition-all;
+    transition-duration: var(--duration-micro);
   }
   .footer-link:hover::after {
     @apply w-full;
   }
 
-  .btn-project {
-    @apply flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg transition-all duration-300 text-sm border cursor-pointer font-semibold pointer-events-auto relative z-40;
+  .project-link {
+    @apply flex items-center justify-center w-9 h-9 rounded-full border border-border text-text-secondary transition-colors relative z-40;
+    transition-duration: var(--duration-micro);
   }
-  .btn-project-glow {
-    @apply bg-glow/20 hover:bg-glow/40 hover:text-white hover:shadow-lg hover:shadow-glow/50 text-glow border-glow/40 hover:border-glow/80;
+  .project-link:hover {
+    @apply border-accent text-accent;
   }
-  .btn-project-violet {
-    @apply bg-violet/20 hover:bg-violet/40 hover:text-white hover:shadow-lg hover:shadow-violet/50 text-violet border-violet/40 hover:border-violet/80;
-  }
-}
-/* Enables 3D hover transforms */
-.perspective {
-  perspective: 800px;
-}
-.preserve-3d {
-  transform-style: preserve-3d;
 }
 
 /* Custom chat scrollbar */
@@ -172,18 +141,18 @@
 }
 
 .chat-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(92, 225, 230, 0.3);
+  background: rgba(45, 212, 191, 0.3);
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 
 .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(92, 225, 230, 0.5);
+  background: rgba(45, 212, 191, 0.5);
 }
 
 /* Firefox scrollbar */
 .chat-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(92, 225, 230, 0.3) rgba(255, 255, 255, 0.02);
+  scrollbar-color: rgba(45, 212, 191, 0.3) rgba(255, 255, 255, 0.02);
 }
 

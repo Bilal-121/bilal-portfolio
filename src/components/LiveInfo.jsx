@@ -28,12 +28,12 @@ export default memo(function LiveInfo() {
   };
 
   return (
-    <div className="flex flex-col items-center text-text/60 text-xs">
+    <div className="flex flex-col items-center text-text-secondary text-xs">
       <div className="flex items-center gap-2">
-        <span className="w-2 h-2 bg-glow rounded-full animate-pulse" />
+        <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
         <span className="font-mono">{formatTime(currentTime)}</span>
       </div>
-      <span className="text-text/50 text-xs">{formatDate(currentTime)}</span>
+      <span className="text-text-muted text-xs">{formatDate(currentTime)}</span>
     </div>
   );
 });

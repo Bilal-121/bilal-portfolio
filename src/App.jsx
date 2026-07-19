@@ -3,6 +3,7 @@ import Lenis from "@studio-freight/lenis";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import About from "./components/About";
+import TechStack from "./components/TechStack";
 import WorkHistory from "./components/WorkHistory";
 import Projects from "./components/Projects";
 import Contact from "./components/Contact";
@@ -55,7 +56,7 @@ export default function App() {
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only absolute top-2 left-2 z-[9999] bg-glow text-background px-4 py-2 rounded-md"
+        className="sr-only focus:not-sr-only absolute top-2 left-2 z-[9999] bg-accent text-bg px-4 py-2 rounded-md"
       >
         Skip to content
       </a>
@@ -65,6 +66,7 @@ export default function App() {
       <main id="main" tabIndex={-1}>
         <Hero />
         <About />
+        <TechStack />
         <WorkHistory />
         <Projects />
         <Contact />
