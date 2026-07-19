@@ -1,107 +1,112 @@
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import heroImage from "../assets/Profile-image.jpg";
 
-import { fadeInUp } from "../lib/motion";
+import { clipRevealOnLoad } from "../lib/motion";
 import { navigateToSection } from "../lib/navigation";
+import { siteConfig } from "../lib/siteConfig";
+import { trackEvent } from "../lib/analytics";
+import useMagneticHover from "../lib/useMagneticHover";
+
+// Candidate headline — drafted for Bilal's review, not final copy.
+// Alternates: "Turning complex products into clean, fast front-ends."
+//             "Front-end developer crafting interfaces people trust."
+const HEADLINE = "I build interfaces that feel as good as they look.";
+
+function MagneticCTA({ as: Tag = "a", className, children, ...props }) {
+  const { ref, style, handlers } = useMagneticHover(0.2);
+  return (
+    <Tag ref={ref} style={style} className={className} {...handlers} {...props}>
+      {children}
+    </Tag>
+  );
+}
 
 export default function Hero() {
-  const ref = useRef(null);
-
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
-
   return (
     <section
-      ref={ref}
       id="hero"
-      className="section relative min-h-[90vh] flex items-center overflow-hidden"
+      className="section relative min-h-[90vh] flex items-center"
     >
-      <motion.div
-        style={{ y }}
-        className="absolute inset-0 bg-gradient-to-tr from-violet/10 via-transparent to-glow/10 blur-[120px] opacity-70 pointer-events-none"
-      />
-
-      <div className="container-g relative z-10">
-        <div className="panel relative overflow-hidden px-6 md:px-12 py-14 md:py-20">
-          <div className="panel-gradient" />
-
-          <div className="grid md:grid-cols-2 items-center gap-10 relative z-10">
-            {/* Text + Image (mobile) + Button */}
-            <div className="flex flex-col">
-              <motion.p
-                variants={fadeInUp}
-                initial="hidden"
-                animate="show"
-                className="text-glow text-lg mb-2"
-              >
-                Hi, my name is
-              </motion.p>
-
-              <motion.h1
-                variants={fadeInUp}
-                initial="hidden"
-                animate="show"
-                className="font-heading text-[56px] md:text-[72px] gradient-text mb-4 leading-tight"
-              >
-                Bilal.
-              </motion.h1>
-
-              <div className="soft-divider mb-6" />
-
-              <motion.p
-                variants={fadeInUp}
-                initial="hidden"
-                animate="show"
-                className="text-text/80 text-lg md:text-xl max-w-[42ch] mb-8"
-              >
-                A Front-End Developer with a passion for crafting beautiful,
-                interactive web experiences.
-              </motion.p>
-
-              {/* Image on mobile — between description and button */}
-              <motion.div
-                variants={fadeInUp}
-                initial="hidden"
-                animate="show"
-                className="flex justify-center mb-8 md:hidden"
-              >
-                <img
-                  src={heroImage}
-                  alt="Bilal Essakini"
-                  className="w-[200px] h-[200px] object-cover rounded-full avatar-rim"
-                  loading="lazy"
-                />
-              </motion.div>
-
-              <motion.a
-                href="/about-me"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigateToSection("about");
-                }}
-                variants={fadeInUp}
-                initial="hidden"
-                animate="show"
-                className="btn-neon relative overflow-hidden self-start"
-              >
-                Get to Know Me
-              </motion.a>
-            </div>
-
-            {/* Image on desktop — right column */}
-            <motion.div
-              variants={fadeInUp}
-              initial="hidden"
-              animate="show"
-              className="hidden md:flex justify-center md:justify-end"
-            >
+      <div className="container-g relative z-10 w-full">
+        <div className="grid tablet:grid-cols-12 gap-10 tablet:gap-6 items-start">
+          {/* Photo — mobile: above text, full width. Desktop: cols 8-12, bottom-aligned */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="order-1 tablet:order-2 tablet:col-start-8 tablet:col-span-5 tablet:self-end flex justify-center tablet:justify-end"
+          >
+            <div className="relative w-[220px] h-[220px] tablet:w-[320px] tablet:h-[320px] overflow-hidden rounded-tl-[24px]">
               <img
                 src={heroImage}
                 alt="Bilal Essakini"
-                className="w-[280px] h-[280px] object-cover rounded-full avatar-rim"
-                loading="lazy"
+                className="w-full h-full object-cover"
+                loading="eager"
               />
+              <div className="absolute inset-0 bg-bg/25 mix-blend-multiply pointer-events-none" />
+            </div>
+          </motion.div>
+
+          {/* Text — cols 1-7, top-aligned */}
+          <div className="order-2 tablet:order-1 tablet:col-span-7 flex flex-col">
+            <motion.p
+              variants={clipRevealOnLoad}
+              custom={0}
+              initial="hidden"
+              animate="show"
+              className="label mb-4"
+            >
+              Bilal Essakini — Front-End Developer
+            </motion.p>
+
+            <motion.h1
+              variants={clipRevealOnLoad}
+              custom={1}
+              initial="hidden"
+              animate="show"
+              className="text-display text-text-primary mb-6"
+            >
+              {HEADLINE}
+            </motion.h1>
+
+            <motion.p
+              variants={clipRevealOnLoad}
+              custom={2}
+              initial="hidden"
+              animate="show"
+              className="text-body-lg text-text-secondary max-w-[48ch] mb-10"
+            >
+              A front-end developer with a passion for crafting beautiful,
+              interactive web experiences.
+            </motion.p>
+
+            <motion.div
+              variants={clipRevealOnLoad}
+              custom={3}
+              initial="hidden"
+              animate="show"
+              className="flex flex-wrap gap-4"
+            >
+              <MagneticCTA
+                href="/projects"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigateToSection("projects");
+                }}
+                className="btn-pill-filled"
+              >
+                View my work
+              </MagneticCTA>
+
+              <MagneticCTA
+                href={siteConfig.resumePath}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("resume_download", { method: "hero" })}
+                className="btn-pill"
+              >
+                Hiring? Get my CV
+              </MagneticCTA>
             </motion.div>
           </div>
         </div>

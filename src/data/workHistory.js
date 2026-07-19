@@ -28,18 +28,13 @@ const workHistory = [
       "Specialized in software engineering, UX design, and web technologies. Delivered multiple high-performing digital products.",
   },
   {
-    title: "IT Support",
-    company: "University of Hertfordshire",
-    period: "Jan 2018 – Mar 2018",
-    description:
-      "Provided technical support and assistance to users, troubleshooting hardware and software issues. Gained experience in customer service and problem-solving.",
-  },
-  {
-    title: "Youth Worker",
-    company: "University of Hertfordshire",
-    period: "Jul 2017 – Aug 2017",
-    description:
-      "Worked with 150+ youth groups, organizing activities and providing support. Developed skills in communication, teamwork, and leadership.",
+    title: "Earlier Experience",
+    company: "Volunteering",
+    period: "2017 – 2018",
+    subEntries: [
+      { title: "IT Support", period: "Jan 2018 – Mar 2018" },
+      { title: "Youth Worker", period: "Jul 2017 – Aug 2017" },
+    ],
   },
 ];
 

@@ -1,21 +1,58 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { FiMenu, FiX } from "react-icons/fi";
 import LiveInfo from "./LiveInfo";
 import { siteConfig } from "../lib/siteConfig";
 import { trackEvent } from "../lib/analytics";
 import { getPathForSection, navigateToSection } from "../lib/navigation";
+import useMagneticHover from "../lib/useMagneticHover";
+import { durationMicro, easePrimary } from "../lib/motion";
 
 const NAV_SECTIONS = [
-  { id: "about", label: "About" },
-  { id: "work", label: "Experience" },
-  { id: "projects", label: "Projects" },
-  { id: "contact", label: "Contact" },
+  { id: "about", index: "01", label: "About" },
+  { id: "work", index: "02", label: "Work" },
+  { id: "projects", index: "03", label: "Projects" },
+  { id: "contact", index: "04", label: "Contact" },
 ];
+
+function MagneticNavLink({ id, index, label, isActive, onClick }) {
+  const { ref, style, handlers } = useMagneticHover(0.25);
+
+  return (
+    <motion.a
+      ref={ref}
+      href={getPathForSection(id)}
+      onClick={(e) => onClick(e, id)}
+      style={style}
+      {...handlers}
+      className={`flex items-center gap-2 font-body text-sm transition-colors ${
+        isActive ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
+      }`}
+    >
+      <span className={`label ${isActive ? "text-accent" : "text-text-muted"}`}>
+        {index}
+      </span>
+      {label}
+      <span
+        className={`h-1 w-1 rounded-full bg-accent transition-opacity ${
+          isActive ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    </motion.a>
+  );
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 80);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -45,6 +82,13 @@ export default function Navbar() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   const handleNav = (e, sectionId) => {
     e.preventDefault();
     navigateToSection(sectionId);
@@ -52,30 +96,31 @@ export default function Navbar() {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-background/35 backdrop-blur-md border-b border-border">
-      <nav className="container-g flex justify-between items-center py-5 md:py-6">
+    <header
+      className={`fixed top-0 left-0 w-full z-50 transition-colors ${
+        scrolled ? "bg-bg border-b border-border" : "bg-transparent border-b border-transparent"
+      }`}
+      style={{ transitionDuration: `${durationMicro}s` }}
+    >
+      <nav className="container-g flex justify-between items-center py-5 desktop:py-6">
         <a
           href="/"
           onClick={(e) => handleNav(e, "hero")}
-          className="font-heading text-2xl gradient-text tracking-widest"
+          className="font-heading text-xl text-text-primary tracking-widest"
         >
           BE
         </a>
 
-        <ul className="hidden md:flex gap-8 font-body text-base text-text/80 items-center">
-          {NAV_SECTIONS.map(({ id, label }) => (
+        <ul className="hidden laptop:flex gap-8 items-center">
+          {NAV_SECTIONS.map(({ id, index, label }) => (
             <li key={id}>
-              <a
-                href={getPathForSection(id)}
-                onClick={(e) => handleNav(e, id)}
-                className={`transition ${
-                  activeSection === id
-                    ? "text-glow"
-                    : "hover:text-glow"
-                }`}
-              >
-                {label}
-              </a>
+              <MagneticNavLink
+                id={id}
+                index={index}
+                label={label}
+                isActive={activeSection === id}
+                onClick={handleNav}
+              />
             </li>
           ))}
           <li>
@@ -84,7 +129,7 @@ export default function Navbar() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent("resume_download", { method: "navbar" })}
-              className="border border-glow text-glow px-3 py-1 rounded hover:bg-glow hover:text-background transition"
+              className="btn-pill py-2"
             >
               Resume
             </a>
@@ -96,7 +141,7 @@ export default function Navbar() {
 
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-glow focus:outline-none"
+          className="laptop:hidden text-text-primary rounded-md"
           aria-label="Toggle menu"
           aria-expanded={isOpen}
         >
@@ -104,47 +149,56 @@ export default function Navbar() {
         </button>
       </nav>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden bg-background border-t border-border text-text/80 font-body text-lg overflow-hidden"
-          >
-            <ul className="flex flex-col gap-6 p-6 items-center text-center">
-              {NAV_SECTIONS.map(({ id, label }) => (
-                <li key={id}>
-                  <a
-                    href={getPathForSection(id)}
-                    onClick={(e) => handleNav(e, id)}
-                    className={`transition ${
-                      activeSection === id ? "text-glow" : "hover:text-glow"
-                    }`}
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
-              <li>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: durationMicro, ease: easePrimary }}
+          className="laptop:hidden fixed inset-0 top-0 bg-bg flex flex-col"
+        >
+          <div className="container-g w-full flex justify-between items-center py-5">
+            <span className="font-heading text-xl text-text-primary tracking-widest">BE</span>
+            <button
+              onClick={() => setIsOpen(false)}
+              aria-label="Close menu"
+              className="text-text-primary"
+            >
+              <FiX size={28} />
+            </button>
+          </div>
+
+          <ul className="flex-1 w-full flex flex-col justify-center items-start gap-8 container-g">
+            {NAV_SECTIONS.map(({ id, index, label }) => (
+              <li key={id}>
                 <a
-                  href={siteConfig.resumePath}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => {
-                    trackEvent("resume_download", { method: "mobile_nav" });
-                    setIsOpen(false);
-                  }}
-                  className="border border-glow text-glow px-3 py-1 rounded hover:bg-glow hover:text-background transition inline-block text-center"
+                  href={getPathForSection(id)}
+                  onClick={(e) => handleNav(e, id)}
+                  className={`flex items-baseline gap-4 text-h1 font-heading ${
+                    activeSection === id ? "text-accent" : "text-text-primary"
+                  }`}
                 >
-                  Resume
+                  <span className="label">{index}</span>
+                  {label}
                 </a>
               </li>
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            ))}
+            <li>
+              <a
+                href={siteConfig.resumePath}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  trackEvent("resume_download", { method: "mobile_nav" });
+                  setIsOpen(false);
+                }}
+                className="btn-pill mt-4"
+              >
+                Resume
+              </a>
+            </li>
+          </ul>
+        </motion.div>
+      )}
     </header>
   );
 }
